@@ -6,17 +6,20 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/09 18:04:08 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/09 18:35:25 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <pthread.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <unistd.h>
+#ifndef CODEXION_H
+# define CODEXION_H
+
+# include <pthread.h>
+# include <sys/time.h>
+# include <time.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <unistd.h>
 
 /* --- dongle --- */
 typedef struct s_dongle
@@ -86,13 +89,14 @@ typedef struct s_sim
 
 	t_coder			*coders;
 	t_dongle		*dongles;
-	t_heap			fifo_queue;
-	t_heap			edf_queue;
 
 	long			start_ts;
 	int				stop_flag;
-	int				burnout_coder_id;
+	int				burnout_id;
 
+	p_thread_t		monitor;
 	pthread_mutex_t	log_lock;
 	pthread_mutex_t	state_lock;
 }	t_sim;
+
+#endif
