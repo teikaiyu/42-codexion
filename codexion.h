@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   codexion.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: heyu <heyu@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/11 15:30:05 by heyu             ###   ########.fr       */
+/*   Updated: 2026/09/12 21:08:51 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ struct s_sim
 };
 
 /* parsing */
-int	parse_args(int argc, char **argv, t_sim *sim);
+int		parse_args(int argc, char **argv, t_sim *sim);
 
 /* init */
 int		init_sim(t_sim *sim);

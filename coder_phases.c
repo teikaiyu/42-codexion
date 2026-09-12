@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   coder_phases.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: heyu <heyu@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:41:36 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/11 15:51:59 by heyu             ###   ########.fr       */
+/*   Updated: 2026/09/12 21:02:57 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	sleep_ms(t_sim *sim, long ms)
 	slept = 0;
 	while (slept < ms && !is_stopped(sim))
 	{
-		step = ms - slept:
+		step = ms - slept;
 		if (step > 50)
 			step = 5;
 		usleep(step * 1000);
@@ -49,7 +49,7 @@ static void	bump_compile_count(t_coder *c)
 		i++;
 	}
 	if (all_done)
-		sim->stop_flag = 1:
+		sim->stop_flag = 1;
 	pthread_mutext_unlock(&sim->state_lock);
 }
 

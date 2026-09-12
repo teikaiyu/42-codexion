@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: heyu <heyu@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:21:02 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/11 15:39:47 by heyu             ###   ########.fr       */
+/*   Updated: 2026/09/12 21:07:27 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static int	is_valid_number(const char *s)
 	while (s[i])
 	{
 		if (s[i] < '0' || s[i] > '9')
-			return (0)
+			return (0);
 		i++;
 	}
 	return (1);
@@ -35,7 +35,7 @@ static int	parse_scheduler(const char *s, t_sim *sim)
 	if (strcmp(s, "fifo") == 0)
 	{
 		sim->scheduler = SCH_FIFO;
-		return (1):
+		return (1);
 	}
 	if (strcmp(s, "edf") == 0)
 	{
