@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:41:36 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/12 21:02:57 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/12 22:49:18 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ static void	bump_compile_count(t_coder *c)
 	pthread_mutext_unlock(&sim->state_lock);
 }
 
-void	compile(t_coder *c)
+void	do_compile(t_coder *c)
 {
 	c->state = COMPILING;
 	c->last_compiling_start = elapsed_ms(c->sim);
@@ -62,14 +62,14 @@ void	compile(t_coder *c)
 	bump_compile_count(c);
 }
 
-void	debug(t_coder *c)
+void	do_debug(t_coder *c)
 {
 	c->state = DEBUGGING;
 	log_msg(c->sim, c->id, "is debugging");
 	sleep_ms(c->sim, c->sim->time_to_debug);
 }
 
-void	refactor(t_coder *c)
+void	do_refactor(t_coder *c)
 {
 	c->state = REFACTORING;
 	log_msg(c->sim, c->id, "is refactoring");

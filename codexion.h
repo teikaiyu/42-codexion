@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/12 21:08:51 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/12 22:48:47 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,17 +50,6 @@ typedef struct s_heap
 	t_hnode	*arr;
 	int		size;
 }	t_heap;
-
-/* mini-heap, array based, capacity bounded by n_coders */
-typedef struct s_dongle
-{
-	int				id;
-	int				in_use;
-	long			free_since_ms; // release time, cooldown
-	t_heap			queue;
-	pthread_mutex_t	lock;
-	pthread_cond_t	cond;
-}	t_dongle;
 
 typedef struct s_dongle
 {
@@ -135,9 +124,9 @@ void	dongle_release(t_dongle *d, t_sim *sim);
 void	*coder_routine(void *arg);
 
 /* coder_phases */
-void	compile(t_coder *c);
-void	debug(t_coder *c);
-void	refactor(t_coder *c);
+void	do_compile(t_coder *c);
+void	do_debug(t_coder *c);
+void	do_refactor(t_coder *c);
 void	sleep_ms(t_sim *sim, long ms);
 
 /* monitor */
