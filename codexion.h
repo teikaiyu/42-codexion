@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   codexion.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*   By: heyu <heyu@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/09 18:35:25 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/11 15:30:05 by heyu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,24 @@
 # include <string.h>
 # include <unistd.h>
 
-/* --- dongle --- */
-typedef struct s_dongle
+/* scheduler type */
+typedef enum e_sched
 {
-	int				id;
-	int				in_use;
-	long			free_since_ms; // release time, cooldown
-	pthread_mutex_t	lock;
-	pthread_cond_t	cond;
-}	t_dongle;
+	SCH_FIFO,
+	SCH_EDF
+}	t_sched;
 
-/* --- heap node (fifo/edf) --- */
+/* coder state */
+typedef enum e_state
+{
+	WAITING,
+	COMPILING,
+	DEBUGGING,
+	REFACTORING,
+	DEAD
+}	t_state;
+
+/* heap node (fifo/edf) */
 typedef struct s_hnode
 {
 	int		coder_id;
@@ -40,43 +47,48 @@ typedef struct s_hnode
 
 typedef struct s_heap
 {
-	t_hnode			*arr;
-	int				size;
-	int				capacity;
-	pthread_mutex_t	lock;
+	t_hnode	*arr;
+	int		size;
 }	t_heap;
 
-/* --- coder state --- */
-typedef enum e_state
+/* mini-heap, array based, capacity bounded by n_coders */
+typedef struct s_dongle
 {
-	COMPILING,
-	DEBUGGING,
-	REFACTORING,
-	WAITING,
-	DEAD
-}	t_state;
+	int				id;
+	int				in_use;
+	long			free_since_ms; // release time, cooldown
+	t_heap			queue;
+	pthread_mutex_t	lock;
+	pthread_cond_t	cond;
+}	t_dongle;
+
+typedef struct s_dongle
+{
+	int				id;
+	int				in_use;
+	long			cooldown_until;
+	t_heap			queue;
+	pthread_mutex_t	lock;
+	pthread_cond_t	cond;
+}	t_dongle;
+
+typedef struct s_sim	t_sim;
 
 typedef struct s_coder
 {
-	int				id;
-	pthread_t		thread;
-	t_state			state;
-	long			last_compile_start; // burnout criteria & edf deadline calc
-	int				compile_count;
-	t_dongle		*left;
-	t_dongle		*right;
-	struct s_sim	*sim;
+	int			id;
+	pthread_t	thread;
+	t_state		state;
+	long		last_compile_start; // burnout criteria & edf deadline calc
+	int			compile_count;
+	t_dongle	*left;
+	t_dongle	*right;
+	int			acquire_left_first;
+	t_sim		*sim;
 }	t_coder;
 
-/* --- scheduler type --- */
-typedef enum e_sched
-{
-	SCHED_FIFO,
-	SCHED_EDF
-}	t_sched;
-
-/* --- simulation main structure --- */
-typedef struct s_sim
+/* simulation main structure */
+struct s_sim
 {
 	int				n_coders;
 	long			time_to_burnout;
@@ -97,6 +109,44 @@ typedef struct s_sim
 	p_thread_t		monitor;
 	pthread_mutex_t	log_lock;
 	pthread_mutex_t	state_lock;
-}	t_sim;
+};
+
+/* parsing */
+int	parse_args(int argc, char **argv, t_sim *sim);
+
+/* init */
+int		init_sim(t_sim *sim);
+void	init_coder(t_sim *sim, int i);
+int		init_dongle(t_sim *sim, int i);
+
+/* cleanup */
+void	destroy_sim(t_sim *sim);
+
+/* heap */
+void	heap_push(t_heap *h, int coder_id, long key);
+int		heap_pop(t_heap *h);
+int		heap_peek(t_heap *h);
+
+/* dongle */
+int		dongle_acquire(t_dongle *d, t_coder *c, long key);
+void	dongle_release(t_dongle *d, t_sim *sim);
+
+/* coder */
+void	*coder_routine(void *arg);
+
+/* coder_phases */
+void	compile(t_coder *c);
+void	debug(t_coder *c);
+void	refactor(t_coder *c);
+void	sleep_ms(t_sim *sim, long ms);
+
+/* monitor */
+void	*monitor_routine(void *arg);
+
+/* utils */
+long	get_ms(void);
+long	elapsed_ms(t_sim *sim);
+int		is_stopped(t_sim *sim);
+void	log_msg(t_sim *sim, int id, const cha *msg);
 
 #endif
