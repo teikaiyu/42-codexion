@@ -1,111 +1,127 @@
-終了条件：
-	- 誰か一人がburnout（前回コンパイル開始からtim_to_burnout msいないに次のコンパイルを開始できなかった）
-	- 全員がnumber_of_compiles_required回以上コンパイルし終えた
+*This project has been created as part of the 42 curriculum by heychong.*
 
-Coffman条件：
-	相互排他（Mutual Exclusion）：リソースを一度に１つのプロセスしか使用できない状態
-	保持しながら待機（Hold and Wait）：あるリソースを確保して持ったまま、別のプロセスのリソース解放を待っている状態
-	横取り不可（No Preemption）：他のプロセスが占有しているリソースを、強制的に奪い取ることができない性質
-	循環待機（Circular Wait）：複数のプロセスが環状になり、お互いが必要としているリソースを持ち合っている状態
+## Description
 
-1. 排他制御(mutex) — 共有資源(dongle)を同時に二人が持たないようにする
-2. 効率的な待機(condition variable) — busy-loopせず、必要な時だけ起こされる
-3. デッドロック回避 — 循環待ち（Coffman条件の一つ）を構造的に潰す
-4. 公平性・starvation回避 — 誰か一人だけがずっと後回しにされ続ける状況を防ぐ（fifo/edfスケジューラ）
-5. 正確なタイミング制御 — burnout検知を10ms以内に行う
-6. リソース管理 — mallocしたものは全部free、mutexもcond dextroyまで面倒見る
+**codexion** simulates N coders sitting in a circular co-working hub, sharing
+N USB dongles (one dongle per seat, positioned between each pair of
+neighbours). Each coder cycles endlessly through three phases —
+**compiling**, **debugging**, **refactoring** — and compiling requires
+holding both the left and right dongle at once. Coders never talk to each
+other; the only thing that decides who gets a dongle next is a scheduler
+(**fifo** or **edf**) enforcing fair, starvation-free access.
 
-制約条件
-- 42のNorm準拠必須
-- セグフォ・ダブルフリー等の異常終了は絶対NG
-- メモリリーク一切禁止
-- グローバル変数禁止
-- 使っていい外部関数は指定リストのみ
+The simulation is a themed variant of the classic dining philosophers
+problem: dongles are forks, compiling is eating, and burning out (failing to
+start a compile within `time_to_burnout` ms of the last one) is a
+philosopher starving to death. It stops the moment a coder burns out, or the
+moment every coder has compiled at least `number_of_compiles_required`
+times.
 
+## Instructions
 
-全体設計と中核ロジック
-データ設計：「１つのsim構造体に全部集約」
-t_sim構造体。全パラメータ・全coder・全dongle・全体の状態（stop_flag等）をここに集約、全スレッドがこの１つの構造体へのポインタを共有する。
-t_coderはt_sim *を逆参照で持つ——だから書くcoderスレッドは自分の構造体１つ受け取れば、必要な情報全部（時間パラメータ、他のcoderの状態、stop_flag）にアクセスできる。
-
-中核ロジック１：dongle取得の仕組み
-発送の転換点：dongle 争奪戦を１つの巨大なheapで管理するのではなく、dongle 一個一個が自分専用の小さいheap（街行列）を持つ。
-理由：課題文に「同じdongleを複数人が要求した時に調停する」と明記——競合はdongle単位。一個のdongleは物理的に隣接する二人のcoderからしか要求されない（円環構造上、n>2なら必ず二人）。
-// n == 1, n == 0, n % 2 == 0, n % 2 == 1 それぞれの場合の検証が必要
-dongle_acquire関数の流れ：
-1. このdongleのheapに自分を登録（key=fifoなら要求時刻、edfならburnout締め切り）
-2. 条件チェック：自分がheap先頭かつ　空き　かつ　cooldown明け
-3. 条件揃うまでpthread_cond_timewaitで待つ
-	（待機上限は「cooldown_until」か「今+50ms」の早い方—誰も起こしてくれない場合でも自分で定期的に目を覚ます保険）
-4. 条件揃った瞬間、heapから自分を取り除き、in_use=1にして確保完了
-
-中核ロジック２：デッドロック回避
-コンパイルには左右dongleが必要。ここでdining philosophers古典問題のデッドロックが起きうる——全員が左手だけもって右手を持つ状態で円環状に膠着する。
-解決策：全員「左→右」の順で取得するが、番号が一番大きいcoderだけ「右→左」で取得する。この一点の非対称性によって、循環待ちの構造が理論的に成立しなくなる。
-`c->acquire_left_first = (c->id != sim->n_coders);`
-n=1の特殊ケースは、left==rightなので二重ロックにならないよう一回だけ取得する分岐で処理。
-
-中核ロジック３：fifo/edfの切り替え
-分岐点はたった一箇所——heapに登録する時のkey計算のみ。
+```sh
+make
+./codexion number_of_coders time_to_burnout time_to_compile time_to_debug \
+           time_to_refactor number_of_compiles_required dongle_cooldown \
+           scheduler
 ```
-if (scheduler == SCH_FIFO)
-	key = 要求時刻；
-else // SCH_EDF
-	key = last_compile_start + time_to_burnout; // 締め切り
+
+- `scheduler` must be exactly `fifo` or `edf`.
+- All numeric arguments must be non-negative integers; `number_of_coders`
+  must additionally be strictly positive. Invalid input is rejected with an
+  error message and exit code 1.
+
+Example:
+
+```sh
+./codexion 5 800 200 200 200 4 50 edf
 ```
-取得ロジック本体は完全共通。fifoは「早いもの順」、edfは「burnout寸前の人優先」——heapのkeyの意味が変わるだけで、同じ仕組みで両方実現。
 
-中核ロジック４：coderスレッドのライフサイクル
-```
-coder_routine(無限ループ、stop_flagまで):
-	dongle両方確保（acquire_both、失敗=stop検知で終了）
-	compile (last_compile_start更新→sleep→カウント+1、全員規定回数か確認)
-	dongle両方解放（cooldown開始時刻セット）
-	debug(sleep)
-	refactor(sleep)
-	ループ先頭へ
-全sleepは5ms刻みの分割sleepでstop_flagを見に行く——burnout等で全体停止が決まった時、フルの待ち時間を待たされず速やかにスレッドが終了できるようにするため。
+`make`, `make bonus`, `make clean`, `make fclean`, `make re` are all
+supported (no bonus features are implemented; `bonus` is an alias for
+`all`).
 
-中核ロジック５：burnout検知（monitor専用スレッド）
-coder自身に「自分がもうすぐ死ぬ」と気づかせる設計は危険（sleep中は判定不可能）。だから別スレッドが外から監視する。
-```
-monitor_routine(1msごとにループ):
-	全coderのlast_compile_startを見て回る
-	now - last_compile_start > time_to_burnoutなら
-		→ログ出力、stop_flag立てる
-```
-1msという短い周期にしてるのは、課題要求「burnoutログは実際の発生から10ms以内」に対して十分な安全マージンを持たせるため。
+## Blocking cases handled
 
-中核ロジック６：終了判定の二重性
-- burnout: monitorがstop_flagを立てる
-- 全員完了: 各coderがcompile完了のたびに、自分のカウンタを+1し、`state_lock`の下で全coderのカウンタを確認、全員が閾値到達してたらそのcoder自身がstop_flagを立てる
-どちらも「立てるのは一回だけ」という保証を`state_lock`の排他で担保（既にstop_flag=1なら上書きしない、という設計——特にmonitor側のcheck_burnoutで明示的にチェックしてる）。
+- **Deadlock (circular wait):** every coder acquires its left dongle then
+  its right dongle, **except the highest-numbered coder**, who acquires
+  right-then-left. This single asymmetry makes a circular hold-and-wait
+  chain around the table structurally impossible, regardless of timing.
+- **Starvation / fair arbitration:** each dongle owns its own small
+  priority queue (a hand-rolled min-heap, no standard library priority
+  queue). Only the coder at the front of a dongle's queue may take it; the
+  key is either arrival timestamp (`fifo`) or
+  `last_compile_start + time_to_burnout` (`edf`), with coder id as a
+  deterministic tie-breaker. Because a dongle is only ever contested by its
+  two neighbours, this guarantees each contested dongle is granted in
+  scheduler order — no coder can be perpetually skipped.
+- **Dongle cooldown:** on release, a dongle stores
+  `now + dongle_cooldown` as its `cooldown_until` timestamp. It cannot be
+  granted again — even to the front-of-queue coder — until that time has
+  passed. Waiting coders self-wake near the cooldown deadline via
+  `pthread_cond_timedwait` rather than being told, since no other thread
+  proactively signals a mere cooldown expiry.
+- **Precise burnout detection:** a dedicated monitor thread polls every
+  coder's `last_compile_start` every 1ms and declares burnout the instant
+  `now - last_compile_start > time_to_burnout`, logging within ~1-2ms of
+  the real event (well inside the 10ms requirement).
+- **Log serialization:** all output goes through one function guarded by a
+  single mutex, so two state-change lines can never interleave.
+- **Single-coder edge case:** with one coder there is only one dongle on
+  the table (as the subject specifies), but compiling still requires two.
+  The second acquisition attempt (on that same, already-held dongle) can
+  therefore never succeed. The coder blocks on it until the monitor
+  detects the burnout and flips `stop_flag`, which unblocks the wait via
+  `is_stopped()` and the coder cleanly releases its one dongle and exits.
+  A single coder can never compile and always burns out — this follows
+  directly from the subject's "two dongles simultaneously" requirement,
+  not from any special-cased shortcut in the code.
 
+## Thread synchronization mechanisms
 
+- **`pthread_mutex_t` per dongle** protects that dongle's `in_use` flag,
+  `cooldown_until` timestamp and its private wait-queue heap. Every read or
+  mutation of that state happens with the lock held, so two coders can
+  never both believe they've taken the same dongle.
+- **`pthread_cond_t` per dongle** lets a coder sleep instead of busy-waiting
+  while it cannot yet take the dongle. `pthread_cond_broadcast` is used
+  (not `signal`) on release, because more than one waiter may need to
+  re-check whether it is now the eligible one; `pthread_cond_timedwait` is
+  used so a waiter also wakes on cooldown expiry even with nobody actively
+  signalling it, capped to a ~50ms poll ceiling as a safety net.
+- **`state_lock`** guards simulation-wide shared state: each coder's
+  `compile_count`, the global `stop_flag`, and `burnout_id`. Both the
+  "all coders reached the required compile count" check (run by whichever
+  coder finishes last) and the monitor's burnout write go through this
+  lock, so the two possible end conditions can never corrupt each other or
+  race to a double-stop.
+- **`log_lock`** serializes every `printf` state-change line.
+- **Coordination coder ↔ monitor:** coders never talk to each other or to
+  the monitor directly; they only expose `last_compile_start` (updated the
+  instant a compile phase begins) and `compile_count`, both behind
+  `state_lock`. The monitor reads `last_compile_start` under no additional
+  coordination beyond that lock's read, decides burnout, and — the moment
+  it does — flips `stop_flag`. Every coder checks `stop_flag` between
+  phases and while waiting for a dongle (bounded by the ~50ms wait cap
+  above), so the whole simulation unwinds cleanly without any thread
+  needing to be cancelled or killed.
 
+## Resources
 
+- Dijkstra, E. W. — *Dining Philosophers Problem* (original formulation of
+  circular resource contention and deadlock).
+- `man pthread_mutex_lock`, `man pthread_cond_timedwait`, `man gettimeofday`
+  — POSIX threading reference used throughout.
+- Earliest Deadline First scheduling — classic real-time scheduling
+  literature (Liu & Layland, 1973) for the theoretical basis of the `edf`
+  priority key used here.
 
-
-dongleについて
-結局一人か二人なんだからヒープを持つ必要すらなくない？配列でいいじゃん。ヒープ自体を使っているのってt_dongleだけで、それ以外はいらなそう（あとヒープ自体を動かす関数）だからいらないと思うんだけど。名前上ヒープになっているだけで挙動は完全にただのt_hnode配列だね。ヒープ操作関数もヒープっていうガワだけかぶったみたいな？
-dongleは隣接2人からしか要求されない。だから各dongleの待ち行列は最大2人。全体で1つのheapにまとめると、無関係な資源同士の待ち合いが発生して、本来並行実行できる部分（例えばn=4でcoder1と3が同時compile）まで不要に直列化してしまう。要求文言も"同一dongleを巡る競合"と明記してるので、per-dongle scopeが仕様に忠実かつ正しい設計
-
-
-n=1の特殊ケースの場合は2個以上のドングルが存在しない→コンパイルなどの一連の動きができない→エラー（システム上クラッシュではない、意図した例外措置）措置をとっている？そうなったらデッドロック回避で二重ロックにならないよう一回だけ取得する分岐をコードないに書いているということ？その条件分岐で取得とかではなくてエラーを示す返り値（この場合は０）をreturnすればそれで良いのでは？
-課題文引用：
-	There is one dongle between each pair of coders... If there is only one coder, there should be only one dongle on the table.
-	Reject invalid inputs such as negative numbers, non-integers, or a scheduler other than fifo or edf.
-
-fifo/edfの切り替えについて
-SCH_EDFの条件時、keyにはlast_compile_start + time_to_burnoutが書き込まれるが、なぜtrim_to_burnoutが足されている？time_to_burnoutは定数だからlast_compile_startだけで良いのでは？どうせstop_flagで判定するし、肝心のstop_flagを操作しているのはbump_compile_countくらいだね。あとis_stoppedか。
-なぜ+ time_to_burnoutが要るのか
-
-coderスレッドのライフサイクルについて
-ドングルの使用が必須なのはコンパイル時のみで本当にあっているか？そのコーダーあたりのスレッドがsleepしている間も、スリープしていない他のコーダーたちは待機できる、ということね。スリープ中はlast_compile_startのカウントは動いてるよね（gettimeofday準拠だから）、ビジーループを防止するのが主な目的か。あとstop_flagはdo_compile時に判定が起きているが、コンパイルした後の一連の流れ（refactorまで）は止まって、compileで終わっちゃわない？これは課題が求めていること？
-
-終了判定について
-stop_flagはsimに１つ存在するのみだが、シミュレーターの関係で１つのコーダーがn_compiles_requiredを満たした時点でそのスレッドを個別に終了とかはしない？n_compiles_requiredが各コーダーそれぞれに適応されるのはまあわかるが（compile_count参照）、終了コード自体は全体で適用されるのはあまり良い実装とは言えないのでは？
-
-t_state DEAD どこで使ってる？
-
-Makefileを変更して、それに伴ってファイルの階層も変更した。srcsというディレクトリを新たにつくり、その中に*.cファイルをぶち込んだ
+**AI usage:** an AI assistant (Claude) was used throughout design and
+implementation — to work through the concurrency design from first
+principles (state machine, mutex/cond usage, deadlock-avoidance ordering,
+per-dongle fair queues, cooldown handling, burnout detection), to write the
+initial C implementation of every file in this repository, and to build and
+run smoke/stress tests (repeated executions, forced-burnout timing checks,
+manual memory-allocation audit) to validate the design. No external code
+was copied; all logic was reasoned through and written specifically for
+this subject.

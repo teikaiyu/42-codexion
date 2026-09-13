@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 22:55:50 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 23:13:05 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,7 @@ typedef enum e_state
 	WAITING,
 	COMPILING,
 	DEBUGGING,
-	REFACTORING,
-	DEAD
+	REFACTORING
 }	t_state;
 
 typedef struct s_hnode

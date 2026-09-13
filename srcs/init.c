@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 21:10:47 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 23:07:03 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 23:25:32 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,8 @@ static int	unwind_dongles(t_sim *sim, int count)
 	return (0);
 }
 
-int	init_sim(t_sim *sim)
+static int	alloc_arrays(t_sim *sim)
 {
-	int	i;
-
 	sim->coders = malloc(sizeof(t_coder) * sim->n_coders);
 	sim->dongles = malloc(sizeof(t_dongle) * sim->n_coders);
 	if (!sim->coders || !sim->dongles)
@@ -75,6 +73,15 @@ int	init_sim(t_sim *sim)
 		free(sim->dongles);
 		return (0);
 	}
+	return (1);
+}
+
+int	init_sim(t_sim *sim)
+{
+	int	i;
+
+	if (!alloc_arrays(sim))
+		return (0);
 	pthread_mutex_init(&sim->log_lock, NULL);
 	pthread_mutex_init(&sim->state_lock, NULL);
 	sim->stop_flag = 0;
