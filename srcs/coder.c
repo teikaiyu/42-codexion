@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 22:31:59 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 18:40:17 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 20:58:22 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,15 @@ static long	compute_key(t_coder *c)
 {
 	if (c->sim->scheduler == SCH_FIFO)
 		return (elapsed_ms(c->sim));
-	return (c->last_compile_start + c->sim->time_to_burnout);
+	return (c->last_compile_start);
+}
+
+static int	take_and_log(t_coder *c, t_dongle *d, long key)
+{
+	if (!dongle_acquire(d, c, key))
+		return (0);
+	log_msg(c->sim, c->id, "has taken a dongle");
+	return (1);
 }
 
 static int	acquire_both(t_coder *c, t_dongle **first, t_dongle **second)
@@ -26,24 +34,18 @@ static int	acquire_both(t_coder *c, t_dongle **first, t_dongle **second)
 	key = compute_key(c);
 	*first = c->left;
 	*second = c->right;
-	if (*first == *second)
-	{
-		if (!dongle_acquire(*first, c, key))
-			return (0);
-		log_msg(c->sim, c->id, "has taken a dongle");
-		return (1);
-	}
 	if (!c->acquire_left_first)
 	{
 		*first = c->right;
 		*second = c->left;
 	}
-	if (!dongle_acquire(*second, c, key))
+	if (!take_and_log(c, *first, key))
+		return (0);
+	if (!take_and_log(c, *second, key))
 	{
 		dongle_release(*first, c->sim);
 		return (0);
 	}
-	log_msg(c->sim, c->id, "has taken a dongle");
 	return (1);
 }
 

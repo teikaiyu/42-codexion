@@ -1,6 +1,5 @@
 NAME = codexion
-CCW = cc -Wall -Wextra -Werror
-PFLAG = -pthread
+CCWP = cc -Wall -Wextra -Werror -pthread
 
 SRC_DIR = srcs
 INC_DIR = includes
@@ -21,10 +20,10 @@ OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CCW) $(PFLAG) $(OBJ) -o $(NAME)
+	$(CCWP) $(OBJ) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CCW) -I$(INC_DIR) -c $< -o $@
+	$(CCWP) -I$(INC_DIR) -c $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
@@ -33,7 +32,7 @@ clean:
 	rm -rf $(OBJ_DIR)
 
 fclean: clean
-	rm -rf $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 

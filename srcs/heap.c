@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 00:25:37 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 00:36:02 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 22:22:08 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,26 +47,13 @@ void	heap_push(t_heap *h, int coder_id, long key)
 	}
 }
 
-int	heap_peek(t_heap *h)
+static void	sift_down(t_heap *h)
 {
-	if (h->size == 0)
-		return (-1);
-	return (h->arr[0].coder_id);
-}
-
-int	heap_pop(t_heap *h)
-{
-	int	id;
 	int	idx;
 	int	left;
 	int	right;
 	int	smallest;
 
-	if (h->size == 0)
-		return (-1);
-	id = h->arr[0].coder_id;
-	h->size--;
-	h->arr[0] = h->arr[h->size];
 	idx = 0;
 	while (1)
 	{
@@ -82,5 +69,17 @@ int	heap_pop(t_heap *h)
 		swap_node(&h->arr[idx], &h->arr[smallest]);
 		idx = smallest;
 	}
+}
+
+int	heap_pop(t_heap *h)
+{
+	int	id;
+
+	if (h->size == 0)
+		return (-1);
+	id = h->arr[0].coder_id;
+	h->size--;
+	h->arr[0] = h->arr[h->size];
+	sift_down(h);
 	return (id);
 }

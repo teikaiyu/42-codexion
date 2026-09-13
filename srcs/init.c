@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 21:10:47 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 18:43:25 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 23:07:03 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	init_coder(t_sim *sim, int i)
 	c->sim = sim;
 }
 
-static	int	unwind_dongles(t_sim *sim, int count)
+static int	unwind_dongles(t_sim *sim, int count)
 {
 	int	i;
 
@@ -56,6 +56,8 @@ static	int	unwind_dongles(t_sim *sim, int count)
 		free(sim->dongles[i].queue.arr);
 		i++;
 	}
+	pthread_mutex_destroy(&sim->log_lock);
+	pthread_mutex_destroy(&sim->state_lock);
 	free(sim->coders);
 	free(sim->dongles);
 	return (0);

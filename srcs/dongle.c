@@ -6,11 +6,18 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 00:14:00 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 18:41:34 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 22:22:33 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+int	heap_peek(t_heap *h)
+{
+	if (h->size == 0)
+		return (-1);
+	return (h->arr[0].coder_id);
+}
 
 static void	build_timespec(struct timespec *ts, long cooldown_until)
 {

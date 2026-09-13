@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 18:37:59 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 22:55:50 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,12 @@
 # include <string.h>
 # include <unistd.h>
 
-/* scheduler type */
 typedef enum e_sched
 {
 	SCH_FIFO,
 	SCH_EDF
 }	t_sched;
 
-/* coder state */
 typedef enum e_state
 {
 	WAITING,
@@ -38,7 +36,6 @@ typedef enum e_state
 	DEAD
 }	t_state;
 
-/* heap node (fifo/edf) */
 typedef struct s_hnode
 {
 	int		coder_id;
@@ -68,7 +65,7 @@ typedef struct s_coder
 	int			id;
 	pthread_t	thread;
 	t_state		state;
-	long		last_compile_start; // burnout criteria & edf deadline calc
+	long		last_compile_start;
 	int			compile_count;
 	t_dongle	*left;
 	t_dongle	*right;
@@ -76,7 +73,6 @@ typedef struct s_coder
 	t_sim		*sim;
 }	t_coder;
 
-/* simulation main structure */
 struct s_sim
 {
 	int				n_coders;
@@ -114,7 +110,6 @@ void	destroy_sim(t_sim *sim);
 /* heap */
 void	heap_push(t_heap *h, int coder_id, long key);
 int		heap_pop(t_heap *h);
-int		heap_peek(t_heap *h);
 
 /* dongle */
 int		dongle_acquire(t_dongle *d, t_coder *c, long key);
