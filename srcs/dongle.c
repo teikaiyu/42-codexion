@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 00:14:00 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 00:22:56 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:41:34 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	dongle_try_take(t_dongle *d, t_coder *c)
 {
 	if (heap_peek(&d->queue) != c->id)
 		return (0);
-	if (d->in_use || get_ms() < d->cooldown_untill)
+	if (d->in_use || get_ms() < d->cooldown_until)
 		return (0);
 	heap_pop(&d->queue);
 	d->in_use = 1;
@@ -38,7 +38,7 @@ static int	dongle_try_take(t_dongle *d, t_coder *c)
 
 int	dongle_acquire(t_dongle *d, t_coder *c, long key)
 {
-	struct timespac	ts;
+	struct timespec	ts;
 	int				taken;
 
 	pthread_mutex_lock(&d->lock);
@@ -46,7 +46,7 @@ int	dongle_acquire(t_dongle *d, t_coder *c, long key)
 	taken = dongle_try_take(d, c);
 	while (!taken && !is_stopped(c->sim))
 	{
-		build_timespec(&ts, d->cooldown_untill);
+		build_timespec(&ts, d->cooldown_until);
 		pthread_cond_timedwait(&d->cond, &d->lock, &ts);
 		taken = dongle_try_take(d, c);
 	}

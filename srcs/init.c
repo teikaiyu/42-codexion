@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 21:10:47 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/12 22:24:25 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:43:25 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,14 @@ int	init_dongle(t_sim *sim, int i)
 {
 	t_dongle	*d;
 
-	d = &sim->dongle[i];
+	d = &sim->dongles[i];
 	d->id = i;
 	d->in_use = 0;
 	d->cooldown_until = 0;
 	d->queue.arr = malloc(sizeof(t_hnode) * sim-> n_coders);
 	if (!d->queue.arr)
 		return (0);
-	d->queue->size = 0;
+	d->queue.size = 0;
 	pthread_mutex_init(&d->lock, NULL);
 	pthread_cond_init(&d->cond, NULL);
 	return (1);
@@ -41,7 +41,7 @@ void	init_coder(t_sim *sim, int i)
 	c->left = &sim->dongles[i];
 	c->right = &sim->dongles[(i + 1) % sim->n_coders];
 	c->acquire_left_first = (c->id != sim->n_coders);
-	c->sim;
+	c->sim = sim;
 }
 
 static	int	unwind_dongles(t_sim *sim, int count)
@@ -53,7 +53,7 @@ static	int	unwind_dongles(t_sim *sim, int count)
 	{
 		pthread_mutex_destroy(&sim->dongles[i].lock);
 		pthread_cond_destroy(&sim->dongles[i].cond);
-		free(sim->dongle[i].queue.arr);
+		free(sim->dongles[i].queue.arr);
 		i++;
 	}
 	free(sim->coders);

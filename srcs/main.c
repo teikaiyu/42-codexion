@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:45:09 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 15:29:54 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:43:52 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static int	run_sim(t_sim *sim)
 	return (1);
 }
 
-int	main(int argv, char **argv)
+int	main(int argc, char **argv)
 {
 	t_sim	sim;
 

@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 22:31:59 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/12 22:49:49 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:40:17 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static long	compute_key(t_coder *c)
 {
 	if (c->sim->scheduler == SCH_FIFO)
-		return (elapsed_ms(s->sim));
+		return (elapsed_ms(c->sim));
 	return (c->last_compile_start + c->sim->time_to_burnout);
 }
 
@@ -33,7 +33,7 @@ static int	acquire_both(t_coder *c, t_dongle **first, t_dongle **second)
 		log_msg(c->sim, c->id, "has taken a dongle");
 		return (1);
 	}
-	if (!c->acquire_left_right)
+	if (!c->acquire_left_first)
 	{
 		*first = c->right;
 		*second = c->left;
@@ -63,7 +63,7 @@ void	*coder_routine(void *arg)
 	c = (t_coder *)arg;
 	while (!is_stopped(c->sim))
 	{
-		if (!acquire_both(c, &first, second))
+		if (!acquire_both(c, &first, &second))
 			break ;
 		do_compile(c);
 		release_both(c, first, second);

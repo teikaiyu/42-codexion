@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/12 23:21:11 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/12 23:31:41 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:44:39 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	*monitor_routine(void *arg)
 		i = 0;
 		while (i < sim->n_coders && !is_stopped(sim))
 		{
-			if (check_burnout(sim, *sim->coders[i], now))
+			if (check_burnout(sim, &sim->coders[i], now))
 				break ;
 			i++;
 		}

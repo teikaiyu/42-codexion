@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:23:27 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/12 22:48:47 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:37:59 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ struct s_sim
 	int				stop_flag;
 	int				burnout_id;
 
-	p_thread_t		monitor;
+	pthread_t		monitor;
 	pthread_mutex_t	log_lock;
 	pthread_mutex_t	state_lock;
 };
@@ -136,6 +136,6 @@ void	*monitor_routine(void *arg);
 long	get_ms(void);
 long	elapsed_ms(t_sim *sim);
 int		is_stopped(t_sim *sim);
-void	log_msg(t_sim *sim, int id, const cha *msg);
+void	log_msg(t_sim *sim, int id, const char *msg);
 
 #endif

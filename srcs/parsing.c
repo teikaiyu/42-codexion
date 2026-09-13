@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:21:02 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/12 21:07:27 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:45:02 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int	parse_args(int argc, char **argv, t_sim *sim)
 	sim->n_coders = atoi(argv[1]);
 	sim->time_to_burnout = atoi(argv[2]);
 	sim->time_to_compile = atoi(argv[3]);
-	sim->tim_to_debug = atoi(argv[4]);
+	sim->time_to_debug = atoi(argv[4]);
 	sim->time_to_refactor = atoi(argv[5]);
 	sim->n_compiles_required = atoi(argv[6]);
 	sim->dongle_cooldown = atoi(argv[7]);

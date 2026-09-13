@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:41:36 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/13 17:59:49 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 18:39:13 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ static void	bump_compile_count(t_coder *c)
 	sim = c->sim;
 	pthread_mutex_lock(&sim->state_lock);
 	c->compile_count++;
-	all_dine = 1;
+	all_done = 1;
 	i = 0;
 	while (i < sim->n_coders)
 	{
@@ -55,7 +55,7 @@ void	do_compile(t_coder *c)
 	c->state = COMPILING;
 	c->last_compile_start = elapsed_ms(c->sim);
 	log_msg(c->sim, c->id, "is compiling");
-	sleep_ms(c->sim, c->sim->time);
+	sleep_ms(c->sim, c->sim->time_to_compile);
 	bump_compile_count(c);
 }
 
