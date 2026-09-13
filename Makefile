@@ -5,8 +5,7 @@ SRC_DIR = srcs
 INC_DIR = includes
 OBJ_DIR = obj
 
-SRCS = main.c parsing.c init.c heap.c dongle.c coder.c \
-coder_phases.c monitor.c utils.coder
+SRCS = main.c parsing.c init.c heap.c dongle.c coder.c coder_phases.c monitor.c utils.coder
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.c=.o))
 
 all: $(NAME)

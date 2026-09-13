@@ -6,14 +6,11 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:41:36 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/12 22:49:18 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 17:59:49 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-/* interruptible sleep; checked in small steps so a stop_flag raised by
-another thread is noticed quickly instead of after the full duration */
 
 void	sleep_ms(t_sim *sim, long ms)
 {
@@ -38,7 +35,7 @@ static void	bump_compile_count(t_coder *c)
 	int		i;
 
 	sim = c->sim;
-	pthread_mutext_lock(&sim->state_lock);
+	pthread_mutex_lock(&sim->state_lock);
 	c->compile_count++;
 	all_dine = 1;
 	i = 0;
@@ -50,13 +47,13 @@ static void	bump_compile_count(t_coder *c)
 	}
 	if (all_done)
 		sim->stop_flag = 1;
-	pthread_mutext_unlock(&sim->state_lock);
+	pthread_mutex_unlock(&sim->state_lock);
 }
 
 void	do_compile(t_coder *c)
 {
 	c->state = COMPILING;
-	c->last_compiling_start = elapsed_ms(c->sim);
+	c->last_compile_start = elapsed_ms(c->sim);
 	log_msg(c->sim, c->id, "is compiling");
 	sleep_ms(c->sim, c->sim->time);
 	bump_compile_count(c);

@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:45:09 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/09 18:56:18 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/13 15:29:54 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	main(int argv, char **argv)
 {
 	t_sim	sim;
 
-	memset(&sim, 0, sizeo(sim));
+	memset(&sim, 0, sizeof(sim));
 	if (!parse_args(argc, argv, &sim))
 		return (handle_err("Error: invalid arguments\n"));
 	if (!init_sim(&sim))
