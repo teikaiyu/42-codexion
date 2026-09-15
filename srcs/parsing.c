@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/11 15:21:02 by heyu              #+#    #+#             */
-/*   Updated: 2026/09/13 18:45:02 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/15 14:08:53 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,13 @@ static int	parse_scheduler(const char *s, t_sim *sim)
 		sim->scheduler = SCH_FIFO;
 		return (1);
 	}
-	if (strcmp(s, "edf") == 0)
+	else if (strcmp(s, "edf") == 0)
 	{
 		sim->scheduler = SCH_EDF;
 		return (1);
 	}
-	return (0);
+	else
+		return (0);
 }
 
 int	parse_args(int argc, char **argv, t_sim *sim)
@@ -58,9 +59,9 @@ int	parse_args(int argc, char **argv, t_sim *sim)
 			return (0);
 		i++;
 	}
-	if (atoi(argv[1]) <= 0)
-		return (0);
 	sim->n_coders = atoi(argv[1]);
+	if (sim->n_coders <= 0)
+		return (0);
 	sim->time_to_burnout = atoi(argv[2]);
 	sim->time_to_compile = atoi(argv[3]);
 	sim->time_to_debug = atoi(argv[4]);
