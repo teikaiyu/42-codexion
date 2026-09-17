@@ -6,7 +6,7 @@
 /*   By: heychong <heychong@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 00:14:00 by heychong          #+#    #+#             */
-/*   Updated: 2026/09/13 22:22:33 by heychong         ###   ########.fr       */
+/*   Updated: 2026/09/17 22:53:06 by heychong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static void	build_timespec(struct timespec *ts, long cooldown_until)
 	if (deadline < now || deadline > now + 50)
 		deadline = now + 50;
 	ts->tv_sec = deadline / 1000;
-	ts->tv_sec = (deadline % 1000) * 1000000;
+	ts->tv_nsec = (deadline % 1000) * 1000000;
 }
 
 static int	dongle_try_take(t_dongle *d, t_coder *c)
